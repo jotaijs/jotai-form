@@ -1,0 +1,82 @@
+{
+  "name": "jotai-form",
+  "description": "👻🔮",
+  "version": "0.0.1",
+  "author": "Daishi Kato",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jotai-labs/jotai-form.git"
+  },
+  "source": "./src/index.ts",
+  "main": "./dist/index.umd.js",
+  "module": "./dist/index.modern.js",
+  "types": "./dist/src/index.d.ts",
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "module": "./dist/index.modern.js",
+      "import": "./dist/index.modern.mjs",
+      "default": "./dist/index.umd.js"
+    }
+  },
+  "sideEffects": false,
+  "files": [
+    "src",
+    "dist"
+  ],
+  "scripts": {
+    "compile": "microbundle build -f modern,umd --globals react=React",
+    "postcompile": "cp dist/index.modern.mjs dist/index.modern.js && cp dist/index.modern.mjs.map dist/index.modern.js.map",
+    "test": "run-s eslint tsc-test jest",
+    "eslint": "eslint --ext .js,.ts,.tsx .",
+    "jest": "jest",
+    "tsc-test": "tsc --project . --noEmit",
+    "examples:01_minimal": "DIR=01_minimal EXT=js webpack serve",
+    "examples:02_typescript": "DIR=02_typescript EXT=tsx webpack serve"
+  },
+  "jest": {
+    "testEnvironment": "jsdom",
+    "preset": "ts-jest/presets/js-with-ts"
+  },
+  "keywords": [
+    "jotai",
+    "react",
+    "form"
+  ],
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {
+    "@testing-library/react": "^13.1.1",
+    "@types/jest": "^27.4.1",
+    "@types/react": "^18.0.5",
+    "@types/react-dom": "^18.0.1",
+    "@typescript-eslint/eslint-plugin": "^5.20.0",
+    "@typescript-eslint/parser": "^5.20.0",
+    "eslint": "^8.13.0",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-jsx-a11y": "^6.5.1",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-react": "^7.29.4",
+    "html-webpack-plugin": "^5.5.0",
+    "jest": "^27.5.1",
+    "jotai": "^1.6.4",
+    "microbundle": "^0.14.2",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^2.6.2",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "ts-jest": "^27.1.4",
+    "ts-loader": "^9.2.8",
+    "typescript": "^4.6.3",
+    "webpack": "^5.72.0",
+    "webpack-cli": "^4.9.2",
+    "webpack-dev-server": "^4.8.1",
+    "yup": "^0.32.11"
+  },
+  "peerDependencies": {
+    "jotai": "*"
+  }
+}
