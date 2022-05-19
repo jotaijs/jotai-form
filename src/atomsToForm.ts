@@ -1,5 +1,4 @@
 import { atom } from 'jotai';
-import { SyncState } from './atomWithValidate';
 
 // Temporary type def
 type CollectionOfAtomValidate = {
@@ -11,44 +10,61 @@ type FormArg = {
   value: unknown;
 };
 
+type Options = {
+  validate: (values: any) => any;
+};
+
 // TODO: add aync handling
 // TODO: add proper generics for infering the collection
-export const atomsToForm = (atoms: CollectionOfAtomValidate) => {
+export const atomsToForm = (
+  atoms: CollectionOfAtomValidate,
+  { validate }: Options,
+) => {
   return atom(
     (get) => {
-      let isValid = true;
-      let errors: null | Array<unknown> = null;
-      let isDirty = false;
+      let valid = true;
+      let dirty = false;
 
       const values = Object.fromEntries(
         Object.entries(atoms).map(([k, v]) => {
-          const val: SyncState<any> = get(v);
+          const val = get(v);
 
+          // @ts-expect-error no types from the root atoms
           if (val.isDirty) {
-            isDirty = true;
+            dirty = true;
           }
 
-          if (!val.isValid && val.error) {
-            isValid = false;
-            if (!errors) {
-              errors = [];
-            }
-            errors.push(val.error);
+          // @ts-expect-error no types from the root atoms
+          if (val.error) {
+            valid = false;
           }
 
           return [k, val];
         }),
       );
 
-      return {
+      // separated for dev reasons
+      const result: any = {
+        errors: [],
         values,
-        errors,
-        isValid,
-        isDirty,
+        isValid: valid,
+        isDirty: dirty,
       };
+
+      try {
+        validate(values);
+      } catch (err) {
+        result.isValidating = false;
+        result.isValid = false;
+        result.errors.push(err);
+      }
+
+      return result;
     },
     (_, set, arg: FormArg) => {
-      if (atoms[arg.key]) set(atoms[arg.key], arg.value);
+      if (atoms[arg.key]) {
+        set(atoms[arg.key], arg.value);
+      }
     },
   );
 };
