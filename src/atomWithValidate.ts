@@ -6,14 +6,14 @@ type CommonState<Value> = {
   isDirty: boolean;
 };
 
-type AsyncState<Value> = CommonState<Value> &
+export type AsyncState<Value> = CommonState<Value> &
   (
     | { isValidating: true }
     | { isValidating: false; isValid: true }
     | { isValidating: false; isValid: false; error: unknown }
   );
 
-type SyncState<Value> = CommonState<Value> &
+export type SyncState<Value> = CommonState<Value> &
   ({ isValid: true } | { isValid: false; error: unknown });
 
 type CommonOptions<Value> = {
