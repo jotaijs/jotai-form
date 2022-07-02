@@ -23,7 +23,7 @@ type LabeledAtoms<Value> = {
   [k: string]: AtomWithValidation<Value>;
 };
 
-export const validateAtomLoadable = (validator: Validator) => {
+export const validateAtom = (validator: Validator) => {
   const baseAtom = atom(async (get) => {
     // helper to convert an object of {string:atom} => {string: value}
     // currently expected `atom` to be one of the output types of `atomWithValidate`
