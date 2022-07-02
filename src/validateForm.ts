@@ -1,7 +1,7 @@
 import { atom, SetStateAction, WritableAtom } from 'jotai';
 import { loadable } from 'jotai/utils';
 
-import type { AsyncState, SyncState } from './atomWithValidate';
+import type { CommonState, AsyncState, SyncState } from './atomWithValidate';
 
 export type GetValues = <Value>(labeledAtoms: LabeledAtoms<Value>) => {
   [k: string]: Value;
@@ -10,7 +10,7 @@ export type Validator = (getValues: GetValues) => Promise<any>;
 
 export type ValidatorState = {
   isValid: undefined | boolean;
-  error: undefined | Error | unknown;
+  error: null | Error | unknown;
   isValidating: undefined | boolean;
 };
 
@@ -30,9 +30,9 @@ export const validateAtom = (validator: Validator) => {
     const getValues = <Value>(labeledAtoms: LabeledAtoms<Value>) => {
       const values = Object.fromEntries(
         Object.entries(labeledAtoms).map(([k, v]) => {
-          // @ts-expect-error intersecting types of `AtomWithValidate<Value>` doesn't
-          // satisfy the `get` type requirements
-          const atomValue = get(v);
+          const atomValue = get(
+            v as WritableAtom<CommonState<Value>, SetStateAction<Value>>,
+          );
 
           return [k, atomValue.value];
         }),

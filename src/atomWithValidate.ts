@@ -1,7 +1,7 @@
 import { atom } from 'jotai';
 import type { WritableAtom, SetStateAction } from 'jotai';
 
-type CommonState<Value> = {
+export type CommonState<Value> = {
   value: Value;
   isDirty: boolean;
 };
