@@ -1,7 +1,7 @@
 import { atom, SetStateAction, WritableAtom } from 'jotai';
 import { loadable } from 'jotai/utils';
 
-import type { CommonState, AsyncState, SyncState } from './atomWithValidate';
+import type { CommonState } from './atomWithValidate';
 
 export type GetValues = <Value>(labeledAtoms: LabeledAtoms<Value>) => {
   [k: string]: Value;
@@ -15,9 +15,10 @@ export type ValidatorState = {
 };
 
 // Wrapper type on top of the 2 outputs from `atomWithValidate`
-type AtomWithValidation<Value> =
-  | WritableAtom<AsyncState<Value>, SetStateAction<Value>>
-  | WritableAtom<SyncState<Value>, SetStateAction<Value>>;
+type AtomWithValidation<Value> = WritableAtom<
+  CommonState<Value>,
+  SetStateAction<Value>
+>;
 
 type LabeledAtoms<Value> = {
   [k: string]: AtomWithValidation<Value>;
@@ -30,9 +31,7 @@ export const validateAtom = (validator: Validator) => {
     const getValues = <Value>(labeledAtoms: LabeledAtoms<Value>) => {
       const values = Object.fromEntries(
         Object.entries(labeledAtoms).map(([k, v]) => {
-          const atomValue = get(
-            v as WritableAtom<CommonState<Value>, SetStateAction<Value>>,
-          );
+          const atomValue = get(v);
 
           return [k, atomValue.value];
         }),
