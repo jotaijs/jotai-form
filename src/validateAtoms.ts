@@ -3,10 +3,9 @@ import { loadable } from 'jotai/utils';
 
 import type { CommonState } from './atomWithValidate';
 
-export type GetValues = <Value>(labeledAtoms: LabeledAtoms<Value>) => {
-  [k: string]: Value;
-};
-export type Validator = <Value>(values: { [k: string]: Value }) => Promise<any>;
+export type Validator = <Values extends Record<string, unknown>>(
+  values: Values,
+) => Promise<Values>;
 
 export type ValidatorState = {
   isValid: undefined | boolean;
@@ -14,7 +13,6 @@ export type ValidatorState = {
   isValidating: undefined | boolean;
 };
 
-// Wrapper type on top of the 2 outputs from `atomWithValidate`
 type AtomWithValidation<Value> = WritableAtom<
   CommonState<Value>,
   SetStateAction<Value>

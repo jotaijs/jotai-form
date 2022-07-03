@@ -37,7 +37,7 @@ describe('validateForm', () => {
           throw new Error('The full name cannot be greater than 12 characters');
         }
 
-        return true;
+        return values;
       },
     );
 
