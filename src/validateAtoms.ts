@@ -6,7 +6,7 @@ import type { CommonState } from './atomWithValidate';
 export type GetValues = <Value>(labeledAtoms: LabeledAtoms<Value>) => {
   [k: string]: Value;
 };
-export type Validator = (getValues: GetValues) => Promise<any>;
+export type Validator = <Value>(values: { [k: string]: Value }) => Promise<any>;
 
 export type ValidatorState = {
   isValid: undefined | boolean;
@@ -24,22 +24,21 @@ type LabeledAtoms<Value> = {
   [k: string]: AtomWithValidation<Value>;
 };
 
-export const validateAtom = (validator: Validator) => {
+export const validateAtoms = <Value>(
+  labeledAtoms: LabeledAtoms<Value>,
+  validator: Validator,
+) => {
   const baseAtom = atom(async (get) => {
-    // helper to convert an object of {string:atom} => {string: value}
-    // currently expected `atom` to be one of the output types of `atomWithValidate`
-    const getValues = <Value>(labeledAtoms: LabeledAtoms<Value>) => {
-      const values = Object.fromEntries(
-        Object.entries(labeledAtoms).map(([k, v]) => {
-          const atomValue = get(v);
+    // extract value from each atom and assign to the given key as label
+    const values = Object.fromEntries(
+      Object.entries(labeledAtoms).map(([k, v]) => {
+        const atomValue = get(v);
 
-          return [k, atomValue.value];
-        }),
-      );
-      return values;
-    };
+        return [k, atomValue.value];
+      }),
+    );
 
-    return validator(getValues);
+    return validator(values);
   });
 
   const derv = atom((get) => {

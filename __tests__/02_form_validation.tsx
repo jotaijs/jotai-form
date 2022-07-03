@@ -3,7 +3,7 @@ import 'regenerator-runtime/runtime';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { useAtom } from 'jotai';
-import { atomWithValidate, validateAtom } from '../src/index';
+import { atomWithValidate, validateAtoms } from '../src/index';
 
 describe('validateForm', () => {
   it('basic form level validation', async () => {
@@ -24,21 +24,22 @@ describe('validateForm', () => {
       },
     });
 
-    const formStateAtom = validateAtom(async (getValues) => {
-      const values = getValues({
+    const formStateAtom = validateAtoms(
+      {
         firstName: firstNameAtom,
         lastName: lastNameAtom,
-      });
+      },
+      async (values) => {
+        if (
+          String(values.firstName).length + String(values.lastName).length >
+          12
+        ) {
+          throw new Error('The full name cannot be greater than 12 characters');
+        }
 
-      if (
-        String(values.firstName).length + String(values.lastName).length >
-        12
-      ) {
-        throw new Error('The full name cannot be greater than 12 characters');
-      }
-
-      return true;
-    });
+        return true;
+      },
+    );
 
     const Component = () => {
       const [firstName, setFirstNameValue] = useAtom(firstNameAtom);

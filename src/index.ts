@@ -1,2 +1,2 @@
 export { atomWithValidate } from './atomWithValidate';
-export { validateAtom } from './validateForm';
+export { validateAtoms } from './validateAtoms';
