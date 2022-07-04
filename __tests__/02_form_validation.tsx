@@ -55,6 +55,7 @@ describe('validateForm', () => {
 
           <div>{`formValid: ${JSON.stringify(formState.isValid)}`}</div>
           <div>{`formError: ${String(formState.error)}`}</div>
+          <div>{`formValues: ${JSON.stringify(formState.values)}`}</div>
 
           <button
             type="button"
@@ -93,6 +94,7 @@ describe('validateForm', () => {
 
       getByText('formValid: true');
       getByText('formError: null');
+      getByText('formValues: {"firstName":"dai","lastName":"shi"}');
     });
 
     // force invalid data and check it
@@ -103,6 +105,7 @@ describe('validateForm', () => {
       getByText('lastName: longend');
       getByText('lastNameValid: true');
       getByText('formValid: false');
+      getByText('formValues: {"firstName":"longstart","lastName":"longend"}');
       getByText(
         'formError: Error: The full name cannot be greater than 12 characters',
       );
@@ -117,6 +120,7 @@ describe('validateForm', () => {
       getByText('lastNameValid: true');
       getByText('formValid: true');
       getByText('formError: null');
+      getByText('formValues: {"firstName":"dai","lastName":"shi"}');
     });
   });
 });

@@ -1,11 +1,11 @@
-import { atom, SetStateAction, WritableAtom } from 'jotai';
+import { atom, Getter, SetStateAction, WritableAtom } from 'jotai';
 import { loadable } from 'jotai/utils';
 
 import type { CommonState } from './atomWithValidate';
 
 export type Validator = <Values extends Record<string, unknown>>(
   values: Values,
-) => Promise<Values>;
+) => Promise<unknown>;
 
 export type ValidatorState = {
   isValid: undefined | boolean;
@@ -18,6 +18,10 @@ type AtomWithValidation<Value> = WritableAtom<
   SetStateAction<Value>
 >;
 
+type State<Values extends Record<string, unknown>> = {
+  values: Values;
+} & ValidatorState;
+
 type LabeledAtoms<Value> = {
   [k: string]: AtomWithValidation<Value>;
 };
@@ -26,8 +30,7 @@ export const validateAtoms = <Value>(
   labeledAtoms: LabeledAtoms<Value>,
   validator: Validator,
 ) => {
-  const baseAtom = atom(async (get) => {
-    // extract value from each atom and assign to the given key as label
+  const $getSourceAtomVals = (get: Getter) => {
     const values = Object.fromEntries(
       Object.entries(labeledAtoms).map(([k, v]) => {
         const atomValue = get(v);
@@ -35,17 +38,32 @@ export const validateAtoms = <Value>(
         return [k, atomValue.value];
       }),
     );
+    return values;
+  };
 
+  const baseAtom = atom(async (get) => {
+    // extract value from each atom and assign to the given key as label
+    const values = $getSourceAtomVals(get);
     return validator(values);
   });
 
-  const derv = atom((get) => {
-    const validatorState = get(loadable(baseAtom));
+  const normalizerAtom = atom((get) => {
+    const values = $getSourceAtomVals(get);
+    const state = get(loadable(baseAtom));
+    return {
+      ...state,
+      values,
+    };
+  });
 
-    const next: ValidatorState = {
+  const derv = atom((get) => {
+    const validatorState = get(normalizerAtom);
+
+    const next: State<typeof validatorState.values> = {
       isValid: true,
       isValidating: undefined,
       error: null,
+      values: validatorState.values,
     };
 
     if (validatorState.state === 'loading') {
