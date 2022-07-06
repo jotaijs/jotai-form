@@ -1,14 +1,19 @@
 import 'regenerator-runtime/runtime';
 
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { useAtom } from 'jotai';
+import * as Yup from 'yup';
 import { atomWithValidate, validateAtoms } from '../src/index';
 
+afterEach(() => {
+  cleanup();
+});
+
 describe('validateForm', () => {
-  it('basic form level validation', async () => {
+  it('basic form level validation | sync', async () => {
     const firstNameAtom = atomWithValidate('dai', {
-      validate: (v: unknown) => {
+      validate: (v) => {
         if (String(v).length < 2) {
           throw new Error('First Name should be greater than 3 characters');
         }
@@ -16,7 +21,7 @@ describe('validateForm', () => {
       },
     });
     const lastNameAtom = atomWithValidate('shi', {
-      validate: (v: unknown) => {
+      validate: (v) => {
         if (String(v).length < 2) {
           throw new Error('Last Name should be greater than 3 characters');
         }
@@ -29,15 +34,13 @@ describe('validateForm', () => {
         firstName: firstNameAtom,
         lastName: lastNameAtom,
       },
-      async (values) => {
+      (values) => {
         if (
-          String(values.firstName).length + String(values.lastName).length >
+          ((values.firstName as string) + (values.lastName as string)).length >
           12
         ) {
           throw new Error('The full name cannot be greater than 12 characters');
         }
-
-        return values;
       },
     );
 
@@ -121,6 +124,114 @@ describe('validateForm', () => {
       getByText('formValid: true');
       getByText('formError: null');
       getByText('formValues: {"firstName":"dai","lastName":"shi"}');
+    });
+  });
+
+  it('basic form level validation | async', async () => {
+    const nameAtom = atomWithValidate('foo', {
+      validate: (v) => v,
+    });
+
+    const ageAtom = atomWithValidate(18, {
+      validate: (v) => v,
+    });
+
+    // FIXME: there's an issue with the types
+    // not being able to inherit dynamic atom types
+    // remove the below once those are fixed.
+    const formStateAtom = validateAtoms(
+      {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        name: nameAtom,
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        age: ageAtom,
+      },
+      async (values) => {
+        await Yup.object()
+          .shape({
+            name: Yup.string().min(3).required(),
+            age: Yup.number().min(18).required(),
+          })
+          .validate(values);
+      },
+    );
+
+    const Component = () => {
+      const [name, setName] = useAtom(nameAtom);
+      const [age, setAge] = useAtom(ageAtom);
+      const [formState] = useAtom(formStateAtom);
+
+      return (
+        <>
+          <div>{`name: ${name.value}`}</div>
+          <div>{`age: ${age.value}`}</div>
+
+          <div>{`formValid: ${JSON.stringify(formState.isValid)}`}</div>
+          <div>{`formError: ${String(formState.error)}`}</div>
+          <div>{`formValues: ${JSON.stringify(formState.values)}`}</div>
+
+          <button
+            type="button"
+            onClick={() => {
+              setName('foo');
+              setAge(18);
+            }}
+          >
+            valid form
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setName('sa');
+              setAge(14);
+            }}
+          >
+            invalid form
+          </button>
+        </>
+      );
+    };
+
+    const { getByText } = render(
+      <div>
+        <Component />
+      </div>,
+    );
+
+    // initial form state
+    await waitFor(() => {
+      getByText('name: foo');
+      getByText('age: 18');
+
+      getByText('formValid: true');
+      getByText('formError: null');
+      getByText('formValues: {"name":"foo","age":18}');
+    });
+
+    // force invalid data and check it
+    fireEvent.click(getByText('invalid form'));
+    await waitFor(() => {
+      getByText('name: sa');
+      getByText('age: 14');
+
+      getByText('formValid: false');
+      getByText('formValues: {"name":"sa","age":14}');
+      getByText(
+        'formError: ValidationError: age must be greater than or equal to 18',
+      );
+    });
+
+    // force valid data and check it
+    fireEvent.click(getByText('valid form'));
+    await waitFor(() => {
+      getByText('name: foo');
+      getByText('age: 18');
+
+      getByText('formValid: true');
+      getByText('formError: null');
+      getByText('formValues: {"name":"foo","age":18}');
     });
   });
 });

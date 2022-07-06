@@ -5,7 +5,7 @@ import type { CommonState } from './atomWithValidate';
 
 export type Validator = <Values extends Record<string, unknown>>(
   values: Values,
-) => Promise<unknown>;
+) => void | Promise<void>;
 
 export type ValidatorState = {
   isValid: undefined | boolean;
@@ -22,9 +22,7 @@ type State<Values extends Record<string, unknown>> = {
   values: Values;
 } & ValidatorState;
 
-type LabeledAtoms<Value> = {
-  [k: string]: AtomWithValidation<Value>;
-};
+type LabeledAtoms<Value> = Record<string, AtomWithValidation<Value>>;
 
 export const validateAtoms = <Value>(
   labeledAtoms: LabeledAtoms<Value>,
