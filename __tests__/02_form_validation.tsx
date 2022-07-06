@@ -35,10 +35,7 @@ describe('validateForm', () => {
         lastName: lastNameAtom,
       },
       (values) => {
-        if (
-          ((values.firstName as string) + (values.lastName as string)).length >
-          12
-        ) {
+        if ((values.firstName + values.lastName).length > 12) {
           throw new Error('The full name cannot be greater than 12 characters');
         }
       },
@@ -136,16 +133,9 @@ describe('validateForm', () => {
       validate: (v) => v,
     });
 
-    // FIXME: there's an issue with the types
-    // not being able to inherit dynamic atom types
-    // remove the below once those are fixed.
     const formStateAtom = validateAtoms(
       {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
         name: nameAtom,
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
         age: ageAtom,
       },
       async (values) => {

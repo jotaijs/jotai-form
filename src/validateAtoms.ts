@@ -3,8 +3,10 @@ import { loadable } from 'jotai/utils';
 
 import type { CommonState } from './atomWithValidate';
 
-export type Validator = <Values extends Record<string, unknown>>(
-  values: Values,
+type inferGeneric<Type> = Type extends AtomWithValidation<infer X> ? X : never;
+
+export type Validator<Keys extends symbol | string | number, Vals> = (
+  values: Record<Keys, Vals>,
 ) => void | Promise<void>;
 
 export type ValidatorState = {
@@ -22,21 +24,22 @@ type State<Values extends Record<string, unknown>> = {
   values: Values;
 } & ValidatorState;
 
-type LabeledAtoms<Value> = Record<string, AtomWithValidation<Value>>;
-
-export const validateAtoms = <Value>(
-  labeledAtoms: LabeledAtoms<Value>,
-  validator: Validator,
+export const validateAtoms = <
+  AtomGroup extends Record<string, AtomWithValidation<any>>,
+  Keys extends keyof AtomGroup,
+  Vals extends AtomGroup[Keys],
+>(
+  labeledAtoms: AtomGroup,
+  validator: Validator<Keys, inferGeneric<Vals>>,
 ) => {
   const $getSourceAtomVals = (get: Getter) => {
     const values = Object.fromEntries(
       Object.entries(labeledAtoms).map(([k, v]) => {
         const atomValue = get(v);
-
         return [k, atomValue.value];
       }),
     );
-    return values;
+    return values as Record<Keys, inferGeneric<Vals>>;
   };
 
   const baseAtom = atom(async (get) => {
