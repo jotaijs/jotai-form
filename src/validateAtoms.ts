@@ -32,7 +32,7 @@ export const validateAtoms = <
   labeledAtoms: AtomGroup,
   validator: Validator<Keys, inferGeneric<Vals>>,
 ) => {
-  const $getSourceAtomVals = (get: Getter) => {
+  const valsAtom = atom((get: Getter) => {
     const values = Object.fromEntries(
       Object.entries(labeledAtoms).map(([k, v]) => {
         const atomValue = get(v);
@@ -40,16 +40,15 @@ export const validateAtoms = <
       }),
     );
     return values as Record<Keys, inferGeneric<Vals>>;
-  };
+  });
 
   const baseAtom = atom(async (get) => {
     // extract value from each atom and assign to the given key as label
-    const values = $getSourceAtomVals(get);
-    return validator(values);
+    return validator(get(valsAtom));
   });
 
   const normalizerAtom = atom((get) => {
-    const values = $getSourceAtomVals(get);
+    const values = get(valsAtom);
     const state = get(loadable(baseAtom));
     return {
       ...state,
