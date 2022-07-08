@@ -35,8 +35,7 @@ export const validateAtoms = <
   const valsAtom = atom((get: Getter) => {
     const values = Object.fromEntries(
       Object.entries(labeledAtoms).map(([k, v]) => {
-        const atomValue = get(v);
-        return [k, atomValue.value];
+        return [k, get(v).value];
       }),
     );
     return values as Record<Keys, inferGeneric<Vals>>;
@@ -47,38 +46,39 @@ export const validateAtoms = <
     return validator(get(valsAtom));
   });
 
-  const normalizerAtom = atom((get) => {
-    const values = get(valsAtom);
-    const state = get(loadable(baseAtom));
-    return {
-      ...state,
-      values,
-    };
-  });
-
   const derv = atom((get) => {
-    const validatorState = get(normalizerAtom);
+    const values = get(valsAtom);
+    const loadableState = get(loadable(baseAtom));
 
-    const next: State<typeof validatorState.values> = {
+    const next: State<typeof values> = {
       isValid: true,
       isValidating: undefined,
       error: null,
-      values: validatorState.values,
+      values,
     };
 
-    if (validatorState.state === 'loading') {
-      next.isValid = undefined;
-      next.isValidating = true;
-    }
-
-    if (validatorState.state === 'hasError') {
-      next.isValid = false;
-      next.error = validatorState.error;
-    }
-
-    if (validatorState.state === 'hasData') {
-      next.isValid = true;
-      next.error = null;
+    switch (loadableState.state) {
+      case 'loading': {
+        next.isValid = undefined;
+        next.isValidating = true;
+        break;
+      }
+      case 'hasData': {
+        next.isValid = true;
+        next.error = null;
+        break;
+      }
+      case 'hasError': {
+        next.isValid = false;
+        next.error = loadableState.error;
+        break;
+      }
+      default: {
+        next.isValid = true;
+        next.isValidating = undefined;
+        next.error = null;
+        break;
+      }
     }
 
     return next;
