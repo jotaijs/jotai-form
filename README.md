@@ -201,12 +201,12 @@ const Form = () => {
 atomWithValidate(initialValue, options);
 ```
 
-| param              | description                                                 | default     |
-| ------------------ | ----------------------------------------------------------- | ----------- |
-| `initialValue`     | The initial value of the atom                               | `undefined` |
-| `options.validate` | function returning value or `throw`s an error               | `undefined` |
-|                    | receives the current value of the atom                      |             |
-| `options.areEqual` | function to compare the initial value to the changed values | `Object.is` |
+| param              | description                                                             | default     |
+| ------------------ | ----------------------------------------------------------------------- | ----------- |
+| `initialValue`     | The initial value of the atom                                           | `undefined` |
+| `options.validate` | function returning value or `throw`s an error                           | `undefined` |
+|                    | receives the current value of the atom. [more...](#validator-functions) |             |
+| `options.areEqual` | function to compare the initial value to the changed values             | `Object.is` |
 
 #### `validateAtoms`
 
@@ -214,10 +214,49 @@ atomWithValidate(initialValue, options);
 atomWithValidate(atomGroup, validator);
 ```
 
-| param       | description                                        | default     |
-| ----------- | -------------------------------------------------- | ----------- |
-| `atomGroup` | an object of `atomsWithValidate` atoms             | `undefined` |
-|             | the keys of the atomGroup are used as names/labels |             |
-|             | when passed to the `validator` function            |             |
-| `validator` | function returning void or `throw`s an error       | `undefined` |
-|             | receives the atomGroup's values with the same keys |             |
+| param       | description                                                                         | default     |
+| ----------- | ----------------------------------------------------------------------------------- | ----------- |
+| `atomGroup` | an object of `atomsWithValidate` atoms                                              | `undefined` |
+|             | the keys of the atomGroup are used as names/labels                                  |             |
+|             | when passed to the `validator` function                                             |             |
+| `validator` | function returning void or `throw`s an error                                        | `undefined` |
+|             | receives the atomGroup's values with the same keys. [more...](#validator-functions) |             |
+
+### Validator Functions
+
+While the API for both the validator functions, `options.validate` or
+`validator` are very similar there's a few differences and also let's talk about
+what they expect to work as a form validator.
+
+**Rules**
+
+Things that apply to both the validator functions
+
+1. If the function executes without any error, the validation was successful.
+2. If there's any error , even something raised from an inner function, it'll
+   make the form invalid.
+3. Can pass in a `async` / sync function for validation.
+4. The function will be passed the value of the atom that they are supposed to
+   validate. (`options.validate` will get the value for it's own atom and
+   `validator` will get all the values from the passed in `atomGroup`)
+
+**Differences**
+
+1. `options.validate` expects you to return the value at the end of the
+   validation to make sure the validation was run for the same value and your
+   state and validated state doesn't have any mismatch.
+
+2. `validator` doesn't expect a return value since it acts as a listener to the
+   group of atoms passed in and the values will not need the same state check
+
+> **Note**: The keys of the object defined for the atomGroup is used as the keys
+> for the `values` that are passed to `validator`
+>
+> ```js
+> const atomGroup = { name: nameAtom, age: ageAtom };
+> const validator = (values) => {
+>   values.name; // nameAtom's value
+>   values.age; // ageAtom's value
+> };
+> validateAtoms(atomGroup, validator);
+> ```
