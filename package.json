@@ -3,6 +3,9 @@
   "description": "👻🔮",
   "version": "0.0.3",
   "author": "Daishi Kato",
+  "contributors": [
+    "Reaper"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/jotai-labs/jotai-form.git"
