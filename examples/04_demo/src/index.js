@@ -32,7 +32,6 @@ const CodeLayout = styled.div`
   align-items: center;
   display: flex;
   justify-content: center;
-  width: 640px;
 `;
 
 const ContentLayout = styled.div`
@@ -41,13 +40,13 @@ const ContentLayout = styled.div`
   flex-direction: column;
 `;
 
-const CodeContainer = styled.div`
-  border-radius: 10px;
-  overflow: hidden;
-`;
-
 const CodePreviewStyled = styled(CodePreview)`
   font-family: 'Hack', monospace !important;
+  max-width: 100%;
+
+  @media screen and (max-width: 768px) {
+    max-width: 60ch;
+  }
 `;
 
 const Input = styled.input`
@@ -109,9 +108,7 @@ const App = () => {
           </Text>
         </ContentLayout>
         <CodeLayout>
-          <CodeContainer>
-            <CodePreviewStyled code={defaultCode} />
-          </CodeContainer>
+          <CodePreviewStyled code={defaultCode} />
         </CodeLayout>
       </PageLayout>
     </BaseLayout>
