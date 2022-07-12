@@ -39,7 +39,8 @@
     "examples:01_minimal": "DIR=01_minimal EXT=js webpack serve",
     "examples:02_typescript": "DIR=02_typescript EXT=tsx webpack serve",
     "examples:03_joi": "DIR=03_joi EXT=tsx webpack serve",
-    "examples:04_demo": "DIR=04_demo EXT=js webpack serve"
+    "examples:04_demo": "DIR=04_demo EXT=js webpack serve",
+    "examples:05_experiments": "DIR=05_experiments EXT=js webpack serve"
   },
   "jest": {
     "testEnvironment": "jsdom",
