@@ -39,7 +39,8 @@
     "examples:01_minimal": "DIR=01_minimal EXT=js webpack serve",
     "examples:02_typescript": "DIR=02_typescript EXT=tsx webpack serve",
     "examples:03_joi": "DIR=03_joi EXT=tsx webpack serve",
-    "examples:04_demo": "DIR=04_demo EXT=js webpack serve"
+    "examples:04_demo": "DIR=04_demo EXT=js webpack serve",
+    "examples:05_zod": "DIR=05_zod EXT=tsx webpack serve"
   },
   "jest": {
     "testEnvironment": "jsdom",
@@ -73,12 +74,16 @@
     "joi": "^17.6.0",
     "jotai": "^1.6.4",
     "microbundle": "^0.14.2",
+    "normalize.css": "^8.0.1",
     "npm-run-all": "^4.1.5",
     "prettier": "^2.6.2",
+    "prism-react-renderer": "^1.3.5",
+    "prismjs": "^1.28.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "regenerator-runtime": "^0.13.9",
     "style-loader": "^3.3.1",
+    "styled-components": "^5.3.5",
     "ts-jest": "^27.1.4",
     "ts-loader": "^9.2.8",
     "typescript": "^4.6.3",
@@ -86,10 +91,7 @@
     "webpack-cli": "^4.9.2",
     "webpack-dev-server": "^4.8.1",
     "yup": "^0.32.11",
-    "prismjs": "^1.28.0",
-    "prism-react-renderer": "^1.3.5",
-    "normalize.css": "^8.0.1",
-    "styled-components": "^5.3.5"
+    "zod": "^3.18.0"
   },
   "peerDependencies": {
     "jotai": "*"
