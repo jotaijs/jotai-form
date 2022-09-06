@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@types/react": "latest",
+    "@types/react-dom": "latest",
     "joi": "latest",
     "jotai": "latest",
     "jotai-form": "latest",
