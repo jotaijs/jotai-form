@@ -2,7 +2,7 @@ import 'regenerator-runtime/runtime';
 
 import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
-import { useAtom } from 'jotai';
+import { useAtom } from 'jotai/react';
 import * as Yup from 'yup';
 import { atomWithValidate, validateAtoms } from '../src/index';
 

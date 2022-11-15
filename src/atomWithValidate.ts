@@ -1,5 +1,5 @@
-import { atom } from 'jotai';
-import type { WritableAtom, SetStateAction } from 'jotai';
+import { atom } from 'jotai/vanilla';
+import type { WritableAtom, SetStateAction } from 'jotai/vanilla';
 
 export type CommonState<Value> = {
   value: Value;
@@ -31,12 +31,12 @@ type SyncOptions<Value> = CommonOptions<Value> & {
 export function atomWithValidate<Value>(
   initialValue: Value,
   options: AsyncOptions<Value>,
-): WritableAtom<AsyncState<Value>, SetStateAction<Value>>;
+): WritableAtom<AsyncState<Value>, [SetStateAction<Value>], void>;
 
 export function atomWithValidate<Value>(
   initialValue: Value,
   options: SyncOptions<Value>,
-): WritableAtom<SyncState<Value>, SetStateAction<Value>>;
+): WritableAtom<SyncState<Value>, [SetStateAction<Value>], void>;
 
 export function atomWithValidate<Value>(
   initialValue: Value,

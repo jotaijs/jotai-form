@@ -1,5 +1,5 @@
 export const defaultCode = `
-import { useAtom } from 'jotai';
+import { useAtom } from 'jotai/react';
 import { atomWithValidate } from 'jotai-form';
 import * as Yup from 'yup';
 

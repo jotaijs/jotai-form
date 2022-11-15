@@ -1,6 +1,6 @@
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
-import { useAtom } from 'jotai';
+import { useAtom } from 'jotai/react';
 import { atomWithValidate } from '../src/index';
 
 describe('atomWithValidate spec', () => {
