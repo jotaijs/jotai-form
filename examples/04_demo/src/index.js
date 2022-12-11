@@ -1,7 +1,7 @@
 import 'normalize.css/normalize.css';
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import { useAtom } from 'jotai';
+import { useAtom } from 'jotai/react';
 import { atomWithValidate } from 'jotai-form';
 import styled from 'styled-components';
 import * as Yup from 'yup';

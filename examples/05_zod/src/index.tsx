@@ -1,6 +1,6 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import { useAtom } from 'jotai';
+import { useAtom } from 'jotai/react';
 import { atomWithValidate } from 'jotai-form';
 import { z } from 'zod';
 

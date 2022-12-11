@@ -1,5 +1,6 @@
-import { atom, Getter, SetStateAction, WritableAtom } from 'jotai';
-import { loadable } from 'jotai/utils';
+import { atom } from 'jotai/vanilla';
+import type { Getter, SetStateAction, WritableAtom } from 'jotai/vanilla';
+import { loadable } from 'jotai/vanilla/utils';
 
 import type { CommonState } from './atomWithValidate';
 
@@ -17,7 +18,8 @@ export type ValidatorState = {
 
 type AtomWithValidation<Value> = WritableAtom<
   CommonState<Value>,
-  SetStateAction<Value>
+  [SetStateAction<Value>],
+  void
 >;
 
 type State<Values extends Record<string, unknown>> = {
