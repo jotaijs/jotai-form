@@ -120,7 +120,7 @@ instead of `value`. This contains the passed atom group's values
 
 ```js
 import { useAtom } from 'jotai';
-import { atomWithValidate } from 'jotai-form';
+import { atomWithValidate, validateAtoms } from 'jotai-form';
 import * as Yup from 'yup';
 
 const nameSchema = Yup.string().required();
@@ -211,7 +211,7 @@ atomWithValidate(initialValue, options);
 #### `validateAtoms`
 
 ```js
-atomWithValidate(atomGroup, validator);
+validateAtoms(atomGroup, validator);
 ```
 
 | param       | description                                                                         | default     |
