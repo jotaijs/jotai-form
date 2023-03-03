@@ -43,14 +43,26 @@ export const validateAtoms = <
     return values as Record<Keys, inferGeneric<Vals>>;
   });
 
+  if (process.env.NODE_ENV !== 'production') {
+    valsAtom.debugPrivate = true;
+  }
+
   const baseAtom = atom(async (get) => {
     // extract value from each atom and assign to the given key as label
     return validator(get(valsAtom));
   });
 
+  if (process.env.NODE_ENV !== 'production') {
+    baseAtom.debugPrivate = true;
+  }
+
   const derv = atom((get) => {
     const values = get(valsAtom);
-    const loadableState = get(loadable(baseAtom));
+    const loadableAtom = loadable(baseAtom);
+    if (process.env.NODE_ENV !== 'production') {
+      loadableAtom.debugPrivate = true;
+    }
+    const loadableState = get(loadableAtom);
 
     const next: State<typeof values> = {
       isValid: true,
