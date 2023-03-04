@@ -70,6 +70,10 @@ export function atomWithValidate<Value>(
     };
   }
   const baseAtom = atom(initialState);
+  if (process.env.NODE_ENV !== 'production') {
+    baseAtom.debugPrivate = true;
+  }
+
   baseAtom.onMount = (setValue) => {
     if (initialPromise) {
       initialPromise
