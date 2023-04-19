@@ -1,6 +1,6 @@
 import { atom, useAtom } from 'jotai';
 
-import { validateAtoms } from 'jotai-form';
+import { validateAtoms } from './validateAtoms';
 
 const noopValidate = (v) => v;
 
