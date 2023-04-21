@@ -4,7 +4,7 @@ import { validateAtoms } from './validateAtoms';
 const noopValidate = <T>(v: T): T => v;
 
 type Options = {
-  validator: (V: unknown) => typeof V | Promise<typeof V>
+  validator: (V: unknown) => typeof V | Promise<typeof V>;
 };
 
 type UseFormOptions = {
@@ -33,14 +33,20 @@ type ActionableNext = {
   value: any;
 };
 
-
-
-export function atomWithFormControls<VType, AtomGroup extends Record<string, WritableAtom<VType, [SetStateAction<VType>], void>>>(labeledAtoms: AtomGroup, options: Options) {
-  const initBooleanState = Object.fromEntries(Object.entries(labeledAtoms).map(([k]) => [k, false]))
+export function atomWithFormControls<
+  VType,
+  AtomGroup extends Record<
+    string,
+    WritableAtom<VType, [SetStateAction<VType>], void>
+  >,
+>(labeledAtoms: AtomGroup, options: Options) {
+  const initBooleanState = Object.fromEntries(
+    Object.entries(labeledAtoms).map(([k]) => [k, false]),
+  );
   const touchedState = atom(initBooleanState);
   const focusedState = atom(initBooleanState);
   const validating = validateAtoms(
-    //@ts-expect-error atomgroup inference issue
+    // @ts-expect-error atomgroup inference issue
     labeledAtoms,
     options.validator ?? noopValidate,
   );
@@ -49,15 +55,14 @@ export function atomWithFormControls<VType, AtomGroup extends Record<string, Wri
     return Object.fromEntries(
       Object.entries(labeledAtoms).map(([k, v]) => {
         const val = get(v);
-        //@ts-expect-error atomgroup inference issue
+        // @ts-expect-error atomgroup inference issue
         if (val.isValidating === false && val.isValid === false)
-          //@ts-expect-error ^
+          // @ts-expect-error result of the line above
           return [k, val.error];
         return [k, null];
       }),
     );
   });
-
 
   const valueAtom = atom(
     (get) => {
@@ -68,21 +73,21 @@ export function atomWithFormControls<VType, AtomGroup extends Record<string, Wri
         case 'SET_TOUCHED':
           return set(touchedState, {
             ...get(touchedState),
-            [next.key]: Boolean(next.value)
+            [next.key]: Boolean(next.value),
           });
         case 'SET_FOCUSED':
           return set(focusedState, {
             ...get(focusedState),
-            [next.key]: Boolean(next.value)
+            [next.key]: Boolean(next.value),
           });
-        case "SET_VALUE":
-          {
-            const actOn = labeledAtoms[next.key];
-            if (!actOn) {
-              return get(validating);
-            }
-            return set(actOn, next.value);
+        case 'SET_VALUE':
+        default: {
+          const actOn = labeledAtoms[next.key];
+          if (!actOn) {
+            return get(validating);
           }
+          return set(actOn, next.value);
+        }
       }
     },
   );
@@ -104,33 +109,37 @@ export function atomWithFormControls<VType, AtomGroup extends Record<string, Wri
 }
 
 // FIXME: [1] T will be a Async/Sync Validator Atom
-export function useFormAtom<T>(atomDef: WritableAtom<T, [SetStateAction<ActionableNext>], void>, { onSubmit }: UseFormOptions) {
+export function useFormAtom<T>(
+  atomDef: WritableAtom<T, [SetStateAction<ActionableNext>], void>,
+  { onSubmit }: UseFormOptions,
+) {
   const [form, setForm] = useAtom(atomDef);
 
   const createHandleOnSubmit = () => {
-    //@ts-expect-error dependent on [1]
-    return <T>(event: T) => onSubmit?.(form.values, event);
+    // @ts-expect-error dependent on [1]
+    return <EventType>(event: EventType) => onSubmit?.(form.values, event);
   };
 
   const createHandleOnFocus = () => {
     return (key: string) => {
-      return () => setForm({
-        action: "SET_FOCUSED",
-        key: key,
-        value: true
-      })
+      return () =>
+        setForm({
+          action: 'SET_FOCUSED',
+          key,
+          value: true,
+        });
     };
   };
 
   const createSetTouched = () => {
     return (key: string, value: boolean) => {
       setForm({
-        action: "SET_TOUCHED",
+        action: 'SET_TOUCHED',
         key,
-        value
-      })
-    }
-  }
+        value,
+      });
+    };
+  };
 
   const createHandleOnBlur = () => {
     return (key: string) => {
@@ -141,11 +150,11 @@ export function useFormAtom<T>(atomDef: WritableAtom<T, [SetStateAction<Actionab
           value: true,
         });
         setForm({
-          action: "SET_FOCUSED",
+          action: 'SET_FOCUSED',
           key,
-          value: false
-        })
-      }
+          value: false,
+        });
+      };
     };
   };
 
@@ -167,6 +176,6 @@ export function useFormAtom<T>(atomDef: WritableAtom<T, [SetStateAction<Actionab
     handleOnChange: createHandleOnChange(),
     handleOnBlur: createHandleOnBlur(),
     handleOnFocus: createHandleOnFocus(),
-    setTouched: createSetTouched()
+    setTouched: createSetTouched(),
   };
 }
