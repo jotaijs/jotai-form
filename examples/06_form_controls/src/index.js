@@ -31,7 +31,7 @@ const fgroup = atomWithFormControls(
 );
 
 const Field = () => {
-  const { form, handleOnChange } = useFormAtom(fgroup, {
+  const { form, handleOnChange,handleOnBlur,handleOnFocus } = useFormAtom(fgroup, {
     onSubmit: (v) => {
       console.log({ v });
     },
@@ -43,8 +43,18 @@ const Field = () => {
       <input
         value={form.values.field}
         onChange={(e) => handleOnChange('field')(e.target.value)}
+        onFocus={handleOnFocus("field")}
+        onBlur={handleOnBlur("field")}
       />
-      <span>{form.isValid ? 'Valid' : `${form.error.field}`}</span>
+      <p>
+      {form.isValid ? 'Valid' : `${form.error.field}`}
+      </p>
+      <p>
+      {form.touched.field ? 'Touched' : 'Untouched'}
+      </p>
+      <p>
+      {form.focused.field ? 'Focused Field' : 'Not in focus'}
+      </p>
     </div>
   );
 };
