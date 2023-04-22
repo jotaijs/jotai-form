@@ -1,14 +1,13 @@
-import { SetStateAction, WritableAtom, atom, useAtom } from 'jotai';
-import { validateAtoms } from './validateAtoms';
+import { atom, useAtom, WritableAtom } from 'jotai';
+import { AtomWithValidation, validateAtoms } from './validateAtoms';
+import type { Validator } from './validateAtoms';
 
-const noopValidate = <T>(v: T): T => v;
-
-type Options = {
-  validator: (V: unknown) => typeof V | Promise<typeof V>;
+type Options<Vkeys extends symbol | string | number, Vvals> = {
+  validate: Validator<Vkeys, Vvals>;
 };
 
 type UseFormOptions = {
-  onSubmit: (v: Record<string, any>, ...args: any[]) => void;
+  onSubmit?: (v: Record<string, any>, ...args: any[]) => void;
 };
 
 export type CommonState<Values> = {
@@ -27,36 +26,41 @@ export type AsyncState<Values> = CommonState<Values> &
 export type SyncState<Values> = CommonState<Values> &
   ({ isValid: true } | { isValid: false; error: unknown });
 
-type ActionableNext = {
+export type ActionableNext = {
   action: 'SET_VALUE' | 'SET_FOCUSED' | 'SET_TOUCHED';
   key: string;
   value: any;
 };
 
+const getDefaultOptions = <K extends symbol | string | number, V>() =>
+  <Options<K, V>>{
+    validate: (v) => v,
+  };
+
 export function atomWithFormControls<
-  VType,
-  AtomGroup extends Record<
-    string,
-    WritableAtom<VType, [SetStateAction<VType>], void>
-  >,
->(labeledAtoms: AtomGroup, options: Options) {
+  AtomGroup extends Record<string, AtomWithValidation<any>>,
+  Keys extends keyof AtomGroup,
+  Vals extends AtomGroup[Keys],
+>(labeledAtoms: AtomGroup, options?: Options<Keys, Vals>) {
+  const { validate } = Object.assign(
+    {},
+    getDefaultOptions<Keys, Vals>(),
+    options,
+  );
   const initBooleanState = Object.fromEntries(
     Object.entries(labeledAtoms).map(([k]) => [k, false]),
   );
+
   const touchedState = atom(initBooleanState);
   const focusedState = atom(initBooleanState);
-  const validating = validateAtoms(
-    // @ts-expect-error atomgroup inference issue
-    labeledAtoms,
-    options.validator ?? noopValidate,
-  );
+  const validating = validateAtoms(labeledAtoms, validate);
 
   const errorsAtom = atom((get) => {
     return Object.fromEntries(
       Object.entries(labeledAtoms).map(([k, v]) => {
         const val = get(v);
         // @ts-expect-error atomgroup inference issue
-        if (val.isValidating === false && val.isValid === false)
+        if (val.isValid === false)
           // @ts-expect-error result of the line above
           return [k, val.error];
         return [k, null];
@@ -96,10 +100,12 @@ export function atomWithFormControls<
     (get) => {
       const errorVals = get(errorsAtom);
       const errLen = Object.keys(errorVals).filter((x) => errorVals[x]).length;
+      const validateAtomResult = get(valueAtom);
+      const isValid = validateAtomResult.isValid && errLen === 0;
       return {
-        ...get(valueAtom),
-        isValid: errLen === 0,
-        error: errorVals,
+        ...validateAtomResult,
+        isValid,
+        errors: errorVals,
         touched: get(touchedState),
         focused: get(focusedState),
       };
@@ -108,16 +114,38 @@ export function atomWithFormControls<
   );
 }
 
-// FIXME: [1] T will be a Async/Sync Validator Atom
-export function useFormAtom<T>(
-  atomDef: WritableAtom<T, [SetStateAction<ActionableNext>], void>,
-  { onSubmit }: UseFormOptions,
+type HookAtomGroup = WritableAtom<
+  {
+    isValid: boolean;
+    error: undefined | Error | any;
+    errors: {
+      [k: string]: any;
+    };
+    touched: {
+      [k: string]: boolean;
+    };
+    focused: {
+      [k: string]: boolean;
+    };
+    values: Record<string, any>;
+    isValidating: boolean | undefined;
+  },
+  [next: ActionableNext],
+  | void
+  | ({
+      values: Record<string, any>;
+    } & import('./validateAtoms').ValidatorState)
+>;
+
+export function useFormAtom(
+  atomDef: HookAtomGroup,
+  options: UseFormOptions = {},
 ) {
   const [form, setForm] = useAtom(atomDef);
 
   const createHandleOnSubmit = () => {
-    // @ts-expect-error dependent on [1]
-    return <EventType>(event: EventType) => onSubmit?.(form.values, event);
+    return <EventType>(event: EventType) =>
+      options.onSubmit?.(form.values, event);
   };
 
   const createHandleOnFocus = () => {

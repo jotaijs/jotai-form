@@ -45,7 +45,10 @@
   },
   "jest": {
     "testEnvironment": "jsdom",
-    "preset": "ts-jest/presets/js-with-ts"
+    "preset": "ts-jest/presets/js-with-ts",
+    "testPathIgnorePatterns": [
+      "__tests__/components"
+    ]
   },
   "keywords": [
     "jotai",

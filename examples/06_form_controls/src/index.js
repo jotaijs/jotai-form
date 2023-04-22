@@ -1,4 +1,3 @@
-import { atom } from 'jotai';
 import {
   atomWithFormControls,
   atomWithValidate,
@@ -17,7 +16,11 @@ const fieldAtom = atomWithValidate(0, {
   },
 });
 
-const emailAtom = atom('');
+const emailAtom = atomWithValidate('', {
+  validate: (v) => {
+    return v;
+  },
+});
 
 const fgroup = atomWithFormControls(
   {
@@ -25,7 +28,9 @@ const fgroup = atomWithFormControls(
     email: emailAtom,
   },
   {
-    validate: (v) => v,
+    validate: (v) => {
+      if (v.field > 3) throw new Error("Can't be greated than 3");
+    },
   },
 );
 
@@ -48,9 +53,10 @@ const Field = () => {
         onFocus={handleOnFocus('field')}
         onBlur={handleOnBlur('field')}
       />
-      <p>{form.isValid ? 'Valid' : `${form.error.field}`}</p>
+      <p>{form.isValid ? 'Valid' : `${form.errors.field}`}</p>
       <p>{form.touched.field ? 'Touched' : 'Untouched'}</p>
       <p>{form.focused.field ? 'Focused Field' : 'Not in focus'}</p>
+      <p>Form Error: {form.error?.toString()}</p>
     </div>
   );
 };
