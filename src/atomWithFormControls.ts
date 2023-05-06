@@ -1,6 +1,6 @@
-import { atom, useAtom, WritableAtom } from 'jotai';
-import { AtomWithValidation, validateAtoms } from './validateAtoms';
+import { atom, SetStateAction, useAtom, WritableAtom } from 'jotai';
 import type { Validator } from './validateAtoms';
+import { AtomWithValidation, validateAtoms } from './validateAtoms';
 
 type Options<Vkeys extends symbol | string | number, Vvals> = {
   validate: Validator<Vkeys, Vvals>;
@@ -9,22 +9,6 @@ type Options<Vkeys extends symbol | string | number, Vvals> = {
 type UseFormOptions = {
   onSubmit?: (v: Record<string, any>, ...args: any[]) => void;
 };
-
-export type CommonState<Values> = {
-  isDirty: boolean;
-  values: Values;
-  touched: boolean;
-};
-
-export type AsyncState<Values> = CommonState<Values> &
-  (
-    | { isValidating: true }
-    | { isValidating: false; isValid: true }
-    | { isValidating: false; isValid: false; error: unknown }
-  );
-
-export type SyncState<Values> = CommonState<Values> &
-  ({ isValid: true } | { isValid: false; error: unknown });
 
 export type ActionableNext = {
   action: 'SET_VALUE' | 'SET_FOCUSED' | 'SET_TOUCHED';
@@ -114,31 +98,24 @@ export function atomWithFormControls<
   );
 }
 
-type HookAtomGroup = WritableAtom<
-  {
-    isValid: boolean;
-    error: undefined | Error | any;
-    errors: {
-      [k: string]: any;
-    };
-    touched: {
-      [k: string]: boolean;
-    };
-    focused: {
-      [k: string]: boolean;
-    };
-    values: Record<string, any>;
-    isValidating: boolean | undefined;
-  },
-  [next: ActionableNext],
-  | void
-  | ({
-      values: Record<string, any>;
-    } & import('./validateAtoms').ValidatorState)
->;
+type FormFieldValues = {
+  isValid: boolean;
+  error: undefined | Error | any;
+  errors: {
+    [k: string]: any;
+  };
+  touched: {
+    [k: string]: boolean;
+  };
+  focused: {
+    [k: string]: boolean;
+  };
+  values: Record<string, any>;
+  isValidating: boolean | undefined;
+};
 
-export function useFormAtom(
-  atomDef: HookAtomGroup,
+export function useFormAtom<Value extends FormFieldValues, Result>(
+  atomDef: WritableAtom<Value, [SetStateAction<ActionableNext>], Result>,
   options: UseFormOptions = {},
 ) {
   const [form, setForm] = useAtom(atomDef);
