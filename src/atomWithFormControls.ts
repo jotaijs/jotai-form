@@ -101,15 +101,9 @@ export function atomWithFormControls<
 type FormFieldValues<Keys extends string, Vals> = WritableAtom<
   {
     isValid: boolean | undefined;
-    errors: {
-      [k: string]: any;
-    };
-    touched: {
-      [k: string]: boolean;
-    };
-    focused: {
-      [k: string]: boolean;
-    };
+    errors: Record<Keys, any>;
+    touched: Record<Keys, boolean>;
+    focused: Record<Keys, boolean>;
     values: Record<Keys, inferGeneric<Vals>>;
     error: unknown;
     isValidating: boolean | undefined;
