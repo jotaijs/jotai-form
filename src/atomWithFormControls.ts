@@ -1,5 +1,5 @@
-import { atom, SetStateAction, useAtom, WritableAtom } from 'jotai';
-import type { Validator } from './validateAtoms';
+import { atom, useAtom, WritableAtom } from 'jotai';
+import type { Validator, ValidatorState, inferGeneric } from './validateAtoms';
 import { AtomWithValidation, validateAtoms } from './validateAtoms';
 
 type Options<Vkeys extends symbol | string | number, Vvals> = {
@@ -98,24 +98,31 @@ export function atomWithFormControls<
   );
 }
 
-type FormFieldValues = {
-  isValid: boolean;
-  error: undefined | Error | any;
-  errors: {
-    [k: string]: any;
-  };
-  touched: {
-    [k: string]: boolean;
-  };
-  focused: {
-    [k: string]: boolean;
-  };
-  values: Record<string, any>;
-  isValidating: boolean | undefined;
-};
+type FormFieldValues<Keys extends string, Vals> = WritableAtom<
+  {
+    isValid: boolean | undefined;
+    errors: {
+      [k: string]: any;
+    };
+    touched: {
+      [k: string]: boolean;
+    };
+    focused: {
+      [k: string]: boolean;
+    };
+    values: Record<Keys, inferGeneric<Vals>>;
+    error: unknown;
+    isValidating: boolean | undefined;
+  },
+  [next: ActionableNext],
+  | void
+  | ({
+      values: Record<Keys, inferGeneric<Vals>>;
+    } & ValidatorState)
+>;
 
-export function useFormAtom<Value extends FormFieldValues, Result>(
-  atomDef: WritableAtom<Value, [SetStateAction<ActionableNext>], Result>,
+export function useFormAtom<Keys extends string, Vals>(
+  atomDef: FormFieldValues<Keys, Vals>,
   options: UseFormOptions = {},
 ) {
   const [form, setForm] = useAtom(atomDef);

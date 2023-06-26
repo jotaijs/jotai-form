@@ -39,6 +39,8 @@ const Field = () => {
     fgroup,
     {
       onSubmit: (v) => {
+        // Disabled for example
+        // eslint-disable-next-line no-console
         console.log({ v });
       },
     },
