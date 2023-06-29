@@ -54,7 +54,14 @@ const Field = () => {
         onFocus={handleOnFocus('field')}
         onBlur={handleOnBlur('field')}
       />
-      <p>{isValid ? 'Valid' : `${fieldErrors.field}`}</p>
+      <p>
+        isValid or Field Error:{' '}
+        {isValid ? (
+          <span style={{ color: 'green' }}>Valid</span>
+        ) : (
+          `${fieldErrors.field}`
+        )}
+      </p>
       <p>{touched.field ? 'Touched' : 'Untouched'}</p>
       <p>{focused.field ? 'Focused Field' : 'Not in focus'}</p>
       <p>Form Error: {error?.toString()}</p>
