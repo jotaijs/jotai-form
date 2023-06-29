@@ -1,13 +1,9 @@
-import { atom, useAtom, WritableAtom } from 'jotai';
-import type { Validator, ValidatorState, inferGeneric } from './validateAtoms';
+import { atom } from 'jotai';
+import type { Validator } from './validateAtoms';
 import { AtomWithValidation, validateAtoms } from './validateAtoms';
 
 type Options<Vkeys extends symbol | string | number, Vvals> = {
   validate: Validator<Vkeys, Vvals>;
-};
-
-type UseFormOptions = {
-  onSubmit?: (v: Record<string, any>, ...args: any[]) => void;
 };
 
 export type ActionableNext = {
@@ -44,9 +40,10 @@ export function atomWithFormControls<
       Object.entries(labeledAtoms).map(([k, v]) => {
         const val = get(v);
         // @ts-expect-error atomgroup inference issue
-        if (val.isValid === false)
+        if (val.isValid === false) {
           // @ts-expect-error result of the line above
           return [k, val.error];
+        }
         return [k, null];
       }),
     );
@@ -80,108 +77,71 @@ export function atomWithFormControls<
     },
   );
 
-  return atom(
-    (get) => {
+  const formControlAtom = atom(
+    (get, options) => {
       const errorVals = get(errorsAtom);
       const errLen = Object.keys(errorVals).filter((x) => errorVals[x]).length;
       const validateAtomResult = get(valueAtom);
       const isValid = validateAtomResult.isValid && errLen === 0;
+
+      // INTERNAL USECASE, AVOID USING IN YOUR OWN LIBS
+      const setter = options.setSelf;
+
       return {
         ...validateAtomResult,
         isValid,
         errors: errorVals,
         touched: get(touchedState),
         focused: get(focusedState),
+        setTouched(key: string, val: boolean) {
+          setter({
+            action: 'SET_TOUCHED',
+            key,
+            value: val,
+          });
+        },
+        setFocused(key: string, val: boolean) {
+          setter({
+            action: 'SET_FOCUSED',
+            key,
+            value: val,
+          });
+        },
+        handleOnChange(key: string) {
+          return (val: any) => {
+            setter({
+              action: 'SET_VALUE',
+              key: key,
+              value: val,
+            });
+          };
+        },
+        handleOnFocus(key: string) {
+          return () =>
+            setter({
+              action: 'SET_FOCUSED',
+              key,
+              value: true,
+            });
+        },
+        handleOnBlur(key: string) {
+          return () => {
+            setter({
+              action: 'SET_TOUCHED',
+              key,
+              value: true,
+            });
+            setter({
+              action: 'SET_FOCUSED',
+              key,
+              value: false,
+            });
+          };
+        },
       };
     },
     (_, set, next: ActionableNext) => set(valueAtom, next),
   );
-}
 
-type FormFieldValues<Keys extends string, Vals> = WritableAtom<
-  {
-    isValid: boolean | undefined;
-    errors: Record<Keys, any>;
-    touched: Record<Keys, boolean>;
-    focused: Record<Keys, boolean>;
-    values: Record<Keys, inferGeneric<Vals>>;
-    error: unknown;
-    isValidating: boolean | undefined;
-  },
-  [next: ActionableNext],
-  | void
-  | ({
-      values: Record<Keys, inferGeneric<Vals>>;
-    } & ValidatorState)
->;
-
-export function useFormAtom<Keys extends string, Vals>(
-  atomDef: FormFieldValues<Keys, Vals>,
-  options: UseFormOptions = {},
-) {
-  const [form, setForm] = useAtom(atomDef);
-
-  const createHandleOnSubmit = () => {
-    return <EventType>(event: EventType) =>
-      options.onSubmit?.(form.values, event);
-  };
-
-  const createHandleOnFocus = () => {
-    return (key: string) => {
-      return () =>
-        setForm({
-          action: 'SET_FOCUSED',
-          key,
-          value: true,
-        });
-    };
-  };
-
-  const createSetTouched = () => {
-    return (key: string, value: boolean) => {
-      setForm({
-        action: 'SET_TOUCHED',
-        key,
-        value,
-      });
-    };
-  };
-
-  const createHandleOnBlur = () => {
-    return (key: string) => {
-      return () => {
-        setForm({
-          action: 'SET_TOUCHED',
-          key,
-          value: true,
-        });
-        setForm({
-          action: 'SET_FOCUSED',
-          key,
-          value: false,
-        });
-      };
-    };
-  };
-
-  const createHandleOnChange = () => {
-    return (key: string) => {
-      return (next: unknown) => {
-        setForm({
-          action: 'SET_VALUE',
-          key,
-          value: next,
-        });
-      };
-    };
-  };
-
-  return {
-    form,
-    handleOnSubmit: createHandleOnSubmit(),
-    handleOnChange: createHandleOnChange(),
-    handleOnBlur: createHandleOnBlur(),
-    handleOnFocus: createHandleOnFocus(),
-    setTouched: createSetTouched(),
-  };
+  return atom((g) => g(formControlAtom));
 }
