@@ -86,7 +86,7 @@ export function atomWithFormControls<
       const errorVals = get(errorsAtom);
       const errLen = Object.keys(errorVals).filter((x) => errorVals[x]).length;
       const validateAtomResult = get(formGroupAtomValues);
-      const isValid = validateAtomResult.isValid && errLen === 0;
+      const isValid = Boolean(validateAtomResult.isValid && errLen === 0);
 
       // INTERNAL USECASE, AVOID USING IN YOUR OWN LIBS
       const setter = atomOptions.setSelf;
