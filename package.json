@@ -40,11 +40,15 @@
     "examples:02_typescript": "DIR=02_typescript EXT=tsx webpack serve",
     "examples:03_joi": "DIR=03_joi EXT=tsx webpack serve",
     "examples:04_demo": "DIR=04_demo EXT=js webpack serve",
-    "examples:05_zod": "DIR=05_zod EXT=tsx webpack serve"
+    "examples:05_zod": "DIR=05_zod EXT=tsx webpack serve",
+    "examples:06_form_controls": "DIR=06_form_controls EXT=js webpack serve"
   },
   "jest": {
     "testEnvironment": "jsdom",
-    "preset": "ts-jest/presets/js-with-ts"
+    "preset": "ts-jest/presets/js-with-ts",
+    "testPathIgnorePatterns": [
+      "__tests__/components"
+    ]
   },
   "keywords": [
     "jotai",

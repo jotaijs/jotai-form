@@ -7,6 +7,15 @@
 - [Initial announcement](https://twitter.com/dai_shi/status/1518562466627821570)
 - [Example with Joi](https://twitter.com/dai_shi/status/1518823782127124480)
 
+## TOC
+
+- [Install](#install)
+- [Usage](#usage)
+  - [Basic Usage](#basic-usage)
+  - [Form Level Validation](#form-level-validation)
+  - [Form Controls](#form-controls)
+- [API](#api)
+
 ## Install
 
 The library can be simply installed by adding `jotai-form` to your dependencies
@@ -27,9 +36,6 @@ pnpm add jotai-form
 > ```
 
 ## Usage
-
-- [Basic Usage](#basic-usage)
-- [Form Level Validation](#form-level-validation)
 
 #### Basic Usage
 
@@ -193,9 +199,126 @@ const Form = () => {
 };
 ```
 
+#### Form Controls
+
+<small>Added in <strong>v0.1.1</strong></small>
+
+Form Group Validation using `validateAtoms` is easier when the form is tinier and doesn't need much, but having multiple such hooks for a larger group of atoms might not be easy and lead to a lot of hooks.
+
+We would like to keep the atomic approach but in case of forms it does need a little extension and so you can do so with `atomWithFormControls`.
+
+Here's an example of what an example of this would look like.
+
+**Notes**
+
+1. `atomWithFormControls` still expects a `atomWithValidate` group to be passed to it, this is so that you can still move and combine the same atom with other
+   form control groups if needed.
+
+```js
+import { useAtom } from 'jotai';
+import { atomWithValidate, validateAtoms } from 'jotai-form';
+import * as Yup from 'yup';
+
+const nameSchema = Yup.string().required();
+
+const firstNameAtom = atomWithValidate('', {
+  validate: async (v) => {
+    await nameSchema.validate(v);
+    return v;
+  },
+});
+
+const lastNameAtom = atomWithValidate('', {
+  validate: async (v) => {
+    await nameSchema.validate(v);
+    return v;
+  },
+});
+
+const formControlAtom = atomWithFormControls(
+  {
+    firstName: firstNameAtom,
+    lastName: lastNameAtom,
+  },
+  {
+    validate: (values) => {
+      if (values.firstName != 'jotai') {
+        throw new Error("Oh well, can't let you in");
+      }
+    },
+  },
+);
+
+function FormComponent() {
+  const {
+    // Values per field
+    values,
+    // is the form valid
+    isValid,
+    // focused state per field
+    focused,
+    // touched state per field
+    touched,
+    // errors per field
+    fieldErrors,
+    // form error
+    error,
+    // handle change of value per field
+    handleOnChange,
+    // handle blur event per field
+    handleOnBlur,
+    // handle focus event per field
+    handleOnFocus,
+  } = useAtomValue(formControlAtom);
+
+  return (
+    <>
+      <form>
+        <div>
+          <input
+            value={values.firstName}
+            onChange={(e) => {
+              handleOnChange('firstName')(e.target.value);
+            }}
+            onFocus={handleOnFocus('firstName')}
+            onBlur={handleOnBlur('firstName')}
+          />
+          <p>
+            {fieldErrors.firstName && touched.firstName
+              ? `${fieldErrors.firstName}`
+              : 'Valid'}
+          </p>
+        </div>
+        <div>
+          <input
+            value={values.lastName}
+            onChange={(e) => {
+              handleOnChange('lastName')(e.target.value);
+            }}
+            onFocus={handleOnFocus('lastName')}
+            onBlur={handleOnBlur('lastName')}
+          />
+          <p>
+            {fieldErrors.firstName && touched.firstName
+              ? `${fieldErrors.firstName}`
+              : 'Valid'}
+          </p>
+        </div>
+        <p>isValid: {isValid ? 'Valid' : "Something's wrong"}</p>
+        <p>Form Error: {error?.toString()}</p>
+      </form>
+    </>
+  );
+}
+```
+
 ## API
 
+## Primitives
+
 #### `atomWithValidate`
+
+`atomWithValidate` is the primary base for create validating atoms and it's state and validations are inferred by the other atoms in most cases.
 
 ```js
 atomWithValidate(initialValue, options);
@@ -208,7 +331,11 @@ atomWithValidate(initialValue, options);
 |                    | receives the current value of the atom. [more...](#validator-functions) |             |
 | `options.areEqual` | function to compare the initial value to the changed values             | `Object.is` |
 
+## Atom Curator Functions
+
 #### `validateAtoms`
+
+The `validateAtoms` function accepts a group of primitives, in this case `atomWithValidate` and a validator function for the entire group
 
 ```js
 validateAtoms(atomGroup, validator);
@@ -222,35 +349,51 @@ validateAtoms(atomGroup, validator);
 | `validator` | function returning void or `throw`s an error                                        | `undefined` |
 |             | receives the atomGroup's values with the same keys. [more...](#validator-functions) |             |
 
+#### `atomWithFormControls`
+
+```js
+atomWithFormControls(atomGroup, options);
+```
+
+| param              | description                                                                         | default     |
+| ------------------ | ----------------------------------------------------------------------------------- | ----------- |
+| `atomGroup`        | an object of `atomsWithValidate` atoms                                              | `undefined` |
+|                    | the keys of the atomGroup are used as names/labels                                  |             |
+|                    | when passed to the `validator` function                                             |             |
+| `options.validate` | function returning void or `throw`s an error                                        | `undefined` |
+|                    | receives the atomGroup's values with the same keys. [more...](#validator-functions) |             |
+
 ### Validator Functions
 
-While the API for both the validator functions, `options.validate` or
+While the API for the validator functions, `options.validate` or
 `validator` are very similar there's a few differences and also let's talk about
-what they expect to work as a form validator.
+how they work and what's the different
 
 **Rules**
 
-Things that apply to both the validator functions
+Things that apply to all the validator functions
 
 1. If the function executes without any error, the validation was successful.
 2. If there's any error , even something raised from an inner function, it'll
    make the form invalid.
 3. Can pass in a `async` / sync function for validation.
 4. The function will be passed the value of the atom that they are supposed to
-   validate. (`options.validate` will get the value for it's own atom and
-   `validator` will get all the values from the passed in `atomGroup`)
+   validate. `options.validate` from `atomWithValidate` will get the value for it's own atom and
+   `validator`, `options.validate` for `validateAtoms` and `atomWithFormControls` will get all the values from the passed in `atomGroup`)
 
 **Differences**
 
-1. `options.validate` expects you to return the value at the end of the
+1. Primitive atoms expects you to return the value at the end of the
    validation to make sure the validation was run for the same value and your
    state and validated state doesn't have any mismatch.
 
-2. `validator` doesn't expect a return value since it acts as a listener to the
-   group of atoms passed in and the values will not need the same state check
+2. Curator Functions doesn't expect a return value since it acts as a listener to the
+   group of atoms passed in and the values will not need the same state check, so you can just throw errors from it and
+   if it doesn't return the values back there won't be a problem
 
 > **Note**: The keys of the object defined for the atomGroup is used as the keys
-> for the `values` that are passed to `validator`
+> for the `values` that are passed to the atom curator functions, the same is applicable
+> for `atomWithFormControls`
 >
 > ```js
 > const atomGroup = { name: nameAtom, age: ageAtom };
@@ -259,4 +402,8 @@ Things that apply to both the validator functions
 >   values.age; // ageAtom's value
 > };
 > validateAtoms(atomGroup, validator);
+>
+> atomWithFormControls(atomGroup, {
+>   validate: validator,
+> });
 > ```
