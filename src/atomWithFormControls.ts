@@ -1,4 +1,4 @@
-import { atom } from 'jotai';
+import { atom } from 'jotai/vanilla';
 import type { Validator } from './validateAtoms';
 import { AtomWithValidation, validateAtoms } from './validateAtoms';
 
@@ -49,7 +49,8 @@ export function atomWithFormControls<
     );
   });
 
-  const valueAtom = atom(
+  // contains extracted values from the validated form group
+  const formGroupAtomValues = atom(
     (get) => {
       return get(validating);
     },
@@ -77,46 +78,56 @@ export function atomWithFormControls<
     },
   );
 
+  // Curated atom with combination of all the form level errors
+  // form group errors, validation at form level, and field level
+  // and controls to edit the form state if needed
   const formControlAtom = atom(
-    (get, options) => {
+    (get, atomOptions) => {
       const errorVals = get(errorsAtom);
       const errLen = Object.keys(errorVals).filter((x) => errorVals[x]).length;
-      const validateAtomResult = get(valueAtom);
+      const validateAtomResult = get(formGroupAtomValues);
       const isValid = validateAtomResult.isValid && errLen === 0;
 
       // INTERNAL USECASE, AVOID USING IN YOUR OWN LIBS
-      const setter = options.setSelf;
+      const setter = atomOptions.setSelf;
 
       return {
         ...validateAtomResult,
         isValid,
-        errors: errorVals,
-        touched: get(touchedState),
-        focused: get(focusedState),
-        setTouched(key: string, val: boolean) {
+        fieldErrors: <Record<Keys, any>>errorVals,
+        touched: <Record<Keys, boolean>>get(touchedState),
+        focused: <Record<Keys, boolean>>get(focusedState),
+        setValue(key: Keys, value: Vals) {
+          setter({
+            action: 'SET_VALUE',
+            key,
+            value,
+          });
+        },
+        setTouched(key: Keys, val: boolean) {
           setter({
             action: 'SET_TOUCHED',
             key,
             value: val,
           });
         },
-        setFocused(key: string, val: boolean) {
+        setFocused(key: Keys, val: boolean) {
           setter({
             action: 'SET_FOCUSED',
             key,
             value: val,
           });
         },
-        handleOnChange(key: string) {
+        handleOnChange(key: Keys) {
           return (val: any) => {
             setter({
               action: 'SET_VALUE',
-              key: key,
+              key,
               value: val,
             });
           };
         },
-        handleOnFocus(key: string) {
+        handleOnFocus(key: Keys) {
           return () =>
             setter({
               action: 'SET_FOCUSED',
@@ -124,7 +135,7 @@ export function atomWithFormControls<
               value: true,
             });
         },
-        handleOnBlur(key: string) {
+        handleOnBlur(key: Keys) {
           return () => {
             setter({
               action: 'SET_TOUCHED',
@@ -140,8 +151,9 @@ export function atomWithFormControls<
         },
       };
     },
-    (_, set, next: ActionableNext) => set(valueAtom, next),
+    (_, set, next: ActionableNext) => set(formGroupAtomValues, next),
   );
 
-  return atom((g) => g(formControlAtom));
+  // Return read only atom to avoid direct modifications to the atom
+  return atom((get) => get(formControlAtom));
 }
