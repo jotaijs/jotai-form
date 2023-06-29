@@ -4,12 +4,14 @@ import { loadable } from 'jotai/vanilla/utils';
 
 import type { CommonState } from './atomWithValidate';
 
-export type inferGeneric<Type> = Type extends AtomWithValidation<infer X>
+export type ExtractTypeOfValidatorValue<Type> = Type extends AtomWithValidation<
+  infer X
+>
   ? X
   : never;
 
 export type Validator<Keys extends symbol | string | number, Vals> = (
-  values: Record<Keys, inferGeneric<Vals>>,
+  values: Record<Keys, ExtractTypeOfValidatorValue<Vals>>,
 ) => void | Promise<void>;
 
 export type ValidatorState = {
@@ -42,7 +44,7 @@ export const validateAtoms = <
         return [k, get(v).value];
       }),
     );
-    return values as Record<Keys, inferGeneric<Vals>>;
+    return values as Record<Keys, ExtractTypeOfValidatorValue<Vals>>;
   });
 
   if (process.env.NODE_ENV !== 'production') {
