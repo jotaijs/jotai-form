@@ -1,5 +1,9 @@
-import { atom } from 'jotai/vanilla';
-import type { Validator } from './validateAtoms';
+import { WritableAtom, atom } from 'jotai/vanilla';
+import type {
+  ExtractTypeOfValidatorValue,
+  Validator,
+  ValidatorState,
+} from './validateAtoms';
 import { AtomWithValidation, validateAtoms } from './validateAtoms';
 
 type Options<Vkeys extends symbol | string | number, Vvals> = {
@@ -12,6 +16,24 @@ export type ActionableNext = {
   value: any;
 };
 
+export type FormControls<Keys extends string, Vals> = {
+  isValid: boolean;
+  fieldErrors: {
+    [k: string]: any;
+  };
+  touched: Record<Keys, boolean>;
+  focused: Record<Keys, boolean>;
+  setValue(key: Keys, value: Vals): void;
+  setTouched(key: Keys, val: boolean): void;
+  setFocused(key: Keys, val: boolean): void;
+  handleOnChange(key: Keys): (val: any) => void;
+  handleOnFocus(key: Keys): () => unknown;
+  handleOnBlur(key: Keys): () => void;
+  values: Record<Keys, ExtractTypeOfValidatorValue<Vals>>;
+  error: unknown;
+  isValidating: boolean | undefined;
+};
+
 const getDefaultOptions = <K extends symbol | string | number, V>() =>
   <Options<K, V>>{
     validate: (v) => v,
@@ -19,7 +41,7 @@ const getDefaultOptions = <K extends symbol | string | number, V>() =>
 
 export function atomWithFormControls<
   AtomGroup extends Record<string, AtomWithValidation<any>>,
-  Keys extends keyof AtomGroup,
+  Keys extends Extract<keyof AtomGroup, string>,
   Vals extends AtomGroup[Keys],
 >(labeledAtoms: AtomGroup, options?: Options<Keys, Vals>) {
   const { validate } = Object.assign(
@@ -155,5 +177,15 @@ export function atomWithFormControls<
   );
 
   // Return read only atom to avoid direct modifications to the atom
-  return atom((get) => get(formControlAtom));
+  const forceCastedAtom = formControlAtom as unknown as WritableAtom<
+    FormControls<Keys, Vals>,
+    [next: ActionableNext],
+    | void
+    | ({
+        values: Record<Keys, ExtractTypeOfValidatorValue<Vals>>;
+      } & ValidatorState &
+        FormControls<Keys, Vals>)
+  >;
+
+  return atom((get) => get(forceCastedAtom));
 }
