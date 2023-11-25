@@ -7647,6 +7647,11 @@ v8-to-istanbul@^8.1.0:
     convert-source-map "^1.6.0"
     source-map "^0.7.3"
 
+valibot@^0.21.0:
+  version "0.21.0"
+  resolved "https://registry.yarnpkg.com/valibot/-/valibot-0.21.0.tgz#7a67d3dab338dc701a4c09ce8d5ede3d093e5c7d"
+  integrity sha512-XnzpX93b1vQL7CB3fHlhpLg7OutYpc3ke8SKOvp7IXgicRfTdP/w8+bf0DjhVsySq6YdF4Opld05mj6bTobo9g==
+
 validate-npm-package-license@^3.0.1:
   version "3.0.4"
   resolved "https://registry.yarnpkg.com/validate-npm-package-license/-/validate-npm-package-license-3.0.4.tgz#fc91f6b9c7ba15c857f4cb2c5defeec39d4f410a"
