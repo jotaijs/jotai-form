@@ -4,17 +4,17 @@ import { useAtom } from 'jotai/react';
 import { atomWithValidate } from 'jotai-form';
 import { email, safeParse, string } from 'valibot';
 
-const emailSchema = string([email()])
+const emailSchema = string([email()]);
 
 const emailAtom = atomWithValidate('demo@jotai.org', {
-  validate: (email) => {
-    const result = safeParse(emailSchema, email);
+  validate: (emailValue) => {
+    const result = safeParse(emailSchema, emailValue);
 
     // We handle the outcome of the validation
     // when an error is detected, we pull out the array of issues to render
     // you can also set "abortEarly" to true and just pick the first one
     if (result.success) {
-      return email;
+      return emailValue;
     }
 
     throw result.issues;
