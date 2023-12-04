@@ -1,17 +1,14 @@
 {
-  "name": "jotai-form-example-typescript",
+  "name": "jotai-form-example",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@types/react": "latest",
-    "@types/react-dom": "latest",
     "jotai": "latest",
-    "jotai-form": "latest",
+    "jotai-form": "latest",    
     "react": "latest",
     "react-dom": "latest",
     "react-scripts": "latest",
-    "typescript": "latest",
-    "yup": "latest"
+    "valibot": "latest"
   },
   "scripts": {
     "start": "react-scripts start",
