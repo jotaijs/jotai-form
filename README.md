@@ -9,12 +9,21 @@
 
 ## TOC
 
-- [Install](#install)
-- [Usage](#usage)
-  - [Basic Usage](#basic-usage)
-  - [Form Level Validation](#form-level-validation)
-  - [Form Controls](#form-controls)
-- [API](#api)
+- [jotai-form](#jotai-form)
+  - [Tweets](#tweets)
+  - [TOC](#toc)
+  - [Install](#install)
+  - [Usage](#usage)
+      - [Basic Usage](#basic-usage)
+      - [Form Level Validation](#form-level-validation)
+      - [Form Controls](#form-controls)
+  - [API](#api)
+  - [Primitives](#primitives)
+      - [`atomWithValidate`](#atomwithvalidate)
+  - [Atom Curator Functions](#atom-curator-functions)
+      - [`validateAtoms`](#validateatoms)
+      - [`atomWithFormControls`](#atomwithformcontrols)
+    - [Validator Functions](#validator-functions)
 
 ## Install
 
