@@ -6,7 +6,7 @@ import type {
 } from './validateAtoms';
 import { AtomWithValidation, validateAtoms } from './validateAtoms';
 
-type Options<Vkeys extends symbol | string | number, Vvals> = {
+export type Options<Vkeys extends symbol | string | number, Vvals> = {
   validate: Validator<Vkeys, Vvals>;
 };
 
