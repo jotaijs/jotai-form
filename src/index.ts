@@ -12,5 +12,5 @@ export type {
 export type {
   Validator,
   ValidatorState,
-  AtomWithValidation
-} from "./validateAtoms"
+  AtomWithValidation,
+} from './validateAtoms';
