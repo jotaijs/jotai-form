@@ -8,3 +8,9 @@ export type {
   Options,
   FormControls,
 } from './atomWithFormControls';
+
+export type {
+  Validator,
+  ValidatorState,
+  AtomWithValidation
+} from "./validateAtoms"
