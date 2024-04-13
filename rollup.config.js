@@ -1,17 +1,22 @@
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+/* eslint
+  @typescript-eslint/no-var-requires: 0,
+  import/no-extraneous-dependencies: 0,
+  global-require: 0,
+*/
+
 const typescript = require('rollup-plugin-typescript2');
-// eslint-disable-next-line import/no-extraneous-dependencies, @typescript-eslint/no-var-requires
 const { minify } = require('rollup-plugin-esbuild');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const { dirname, resolve, join } = require('path');
 
 /** @returns {import("rollup").RollupOptions[]} */
 module.exports = function config() {
   const builder = configBuilder();
 
+  const pkg = require('./package.json');
+
   return builder.merge(
     // core
-    builder.buildUMD('./src/index.ts', require('./package.json').name, 'dist'),
+    builder.buildUMD('./src/index.ts', pkg.name, 'dist'),
     builder.buildESM('./src/index.ts', 'dist'),
 
     // react
