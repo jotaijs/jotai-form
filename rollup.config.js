@@ -1,0 +1,106 @@
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const typescript = require('rollup-plugin-typescript2');
+// eslint-disable-next-line import/no-extraneous-dependencies, @typescript-eslint/no-var-requires
+const { minify } = require('rollup-plugin-esbuild');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { dirname, resolve, join } = require('path');
+
+/** @returns {import("rollup").RollupOptions[]} */
+module.exports = function config() {
+  const builder = configBuilder();
+
+  return builder.merge(
+    // core
+    builder.buildUMD('./src/index.ts', require('./package.json').name, 'dist'),
+    builder.buildESM('./src/index.ts', 'dist'),
+
+    // react
+    builder.buildUMD('./src/react/index.ts', 'jotai-form-react', 'dist/react'),
+    builder.buildESM('./src/react/index.ts', 'dist/react'),
+  );
+};
+
+function configBuilder({ env } = {}) {
+  /** @type {Partial<import("rollup").RollupOptions>} */
+
+  const isDev = env || process.env.NODE_ENV !== 'production';
+
+  const getCommonPlugins = (input, output) =>
+    [
+      !isDev ? minify() : false,
+      typescript({
+        cwd: process.cwd(),
+        useTsconfigDeclarationDir: true,
+        tsconfig: './tsconfig.json',
+        tsconfigOverride: {
+          compilerOptions: {
+            module: 'ESNext',
+            target: 'esnext',
+          },
+        },
+        tsconfigDefaults: {
+          compilerOptions: {
+            declarationDir: join(resolve(output), dirname(input)),
+            declaration: true,
+          },
+          files: [input],
+        },
+      }),
+    ].filter(Boolean);
+
+  return {
+    merge(...configs) {
+      return [].concat(configs).flat(1);
+    },
+    /** @returns {import("rollup").RollupOptions[]} */
+    buildESM(input, output) {
+      const plugins = getCommonPlugins(input, output);
+
+      return [
+        {
+          input,
+          output: {
+            globals: {
+              react: 'React',
+            },
+            dir: output,
+            format: 'es',
+            entryFileNames: '[name].modern.js',
+          },
+          plugins: [...plugins],
+        },
+        {
+          input,
+          output: {
+            globals: {
+              react: 'React',
+            },
+            dir: output,
+            format: 'es',
+            entryFileNames: '[name].modern.mjs',
+          },
+          plugins: [...plugins],
+        },
+      ];
+    },
+    /** @returns {import("rollup").RollupOptions[]} */
+    buildUMD(input, name, output) {
+      const plugins = getCommonPlugins(input, output);
+      return [
+        {
+          input,
+          output: {
+            globals: {
+              react: 'React',
+            },
+            format: 'umd',
+            dir: output,
+            name,
+            entryFileNames: '[name].umd.js',
+          },
+          plugins: [...plugins],
+        },
+      ];
+    },
+  };
+}
