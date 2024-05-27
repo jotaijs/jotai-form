@@ -19,7 +19,7 @@ export type ActionableNext = {
 export type FormControls<Keys extends string, Vals> = {
   isValid: boolean;
   fieldErrors: {
-    [k in Keys]: Error;
+    [k in Keys]: string | Error | any;
   };
   touched: Record<Keys, boolean>;
   focused: Record<Keys, boolean>;
