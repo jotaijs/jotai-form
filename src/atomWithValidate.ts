@@ -1,5 +1,5 @@
 import { atom } from 'jotai/vanilla';
-import type { WritableAtom, SetStateAction } from 'jotai/vanilla';
+import type { SetStateAction, WritableAtom } from 'jotai/vanilla';
 
 export type CommonState<Value> = {
   value: Value;
