@@ -1,7 +1,10 @@
+import {
+  AtomWithValidation,
+  Options,
+  atomWithFormControls,
+  atomWithValidate,
+} from 'jotai-form';
 import { ZodDefault, ZodObject, ZodType } from 'zod';
-import { Options, atomWithFormControls } from '../atomWithFormControls';
-import { atomWithValidate } from '../atomWithValidate';
-import { AtomWithValidation } from '../validateAtoms';
 
 const INSTANCE_DEFAULT_MAP = {
   string: 'defaultemail',

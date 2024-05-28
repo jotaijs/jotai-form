@@ -24,8 +24,12 @@ module.exports = function config() {
     builder.buildESM('./src/react/index.ts', 'dist/react'),
 
     // utils - zod
-    builder.buildUMD('./src/utils/zod.ts', 'jotai-form-zod', 'dist/utils/zod'),
-    builder.buildESM('./src/utils/zod.ts', 'dist/utils/zod'),
+    builder.buildUMD('./src/utils/zod.ts', 'jotai-form-zod', 'dist/utils/zod', {
+      external: [/^jotai\//, 'jotai-form', 'zod'],
+    }),
+    builder.buildESM('./src/utils/zod.ts', 'dist/utils/zod', {
+      external: [/^jotai\//, 'jotai-form', 'zod'],
+    }),
   );
 };
 
@@ -61,8 +65,10 @@ function configBuilder({ env } = {}) {
     merge(...configs) {
       return [].concat(configs).flat(1);
     },
-    /** @returns {import("rollup").RollupOptions[]} */
-    buildESM(input, output) {
+    /**
+     * @param {import("rollup").RollupOptions} options
+     * @returns {import("rollup").RollupOptions[]} */
+    buildESM(input, output, options = {}) {
       const plugins = getCommonPlugins(input, output);
 
       return [
@@ -77,6 +83,7 @@ function configBuilder({ env } = {}) {
             entryFileNames: '[name].modern.js',
           },
           plugins: [...plugins],
+          ...options,
         },
         {
           input,
@@ -89,11 +96,15 @@ function configBuilder({ env } = {}) {
             entryFileNames: '[name].modern.mjs',
           },
           plugins: [...plugins],
+          ...options,
         },
       ];
     },
-    /** @returns {import("rollup").RollupOptions[]} */
-    buildUMD(input, name, output) {
+
+    /**
+     * @param {import("rollup").RollupOptions} options
+     * @returns {import("rollup").RollupOptions[]} */
+    buildUMD(input, name, output, options = {}) {
       const plugins = getCommonPlugins(input, output);
       return [
         {
@@ -108,6 +119,7 @@ function configBuilder({ env } = {}) {
             entryFileNames: '[name].umd.js',
           },
           plugins: [...plugins],
+          ...options,
         },
       ];
     },

@@ -60,7 +60,10 @@
     "preset": "ts-jest/presets/js-with-ts",
     "testPathIgnorePatterns": [
       "__tests__/components"
-    ]
+    ],
+    "moduleNameMapper": {
+      "jotai-form": "<rootDir>/src"
+    }
   },
   "keywords": [
     "jotai",
