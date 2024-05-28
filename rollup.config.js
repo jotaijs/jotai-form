@@ -22,6 +22,10 @@ module.exports = function config() {
     // react
     builder.buildUMD('./src/react/index.ts', 'jotai-form-react', 'dist/react'),
     builder.buildESM('./src/react/index.ts', 'dist/react'),
+
+    // utils - zod
+    builder.buildUMD('./src/utils/zod.ts', 'jotai-form-zod', 'dist/utils/zod'),
+    builder.buildESM('./src/utils/zod.ts', 'dist/utils/zod'),
   );
 };
 
