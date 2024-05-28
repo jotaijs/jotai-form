@@ -1,4 +1,4 @@
-import { WritableAtom, atom } from 'jotai/vanilla';
+import { atom, WritableAtom } from 'jotai/vanilla';
 import type {
   ExtractTypeOfValidatorValue,
   Validator,
@@ -19,7 +19,7 @@ export type ActionableNext = {
 export type FormControls<Keys extends string, Vals> = {
   isValid: boolean;
   fieldErrors: {
-    [k: string]: any;
+    [k in Keys]: string | Error | any;
   };
   touched: Record<Keys, boolean>;
   focused: Record<Keys, boolean>;
