@@ -26,7 +26,7 @@ export const FormControlPrimitiveValues = ({ atomDef }: Props) => {
         aria-label="agree-input"
         type="checkbox"
         checked={values.agreed}
-        onChange={(e) => handleOnChange('agreed')(e.target.value)}
+        onChange={(e) => handleOnChange('agreed')(e.target.checked)}
       />
       <p>agreed: {values.agreed ? 'Yes' : 'No'}</p>
     </>

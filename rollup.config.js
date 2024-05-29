@@ -30,6 +30,14 @@ module.exports = function config() {
     builder.buildESM('./src/utils/zod.ts', 'dist/utils/zod', {
       external: [/^jotai\//, 'jotai-form', 'zod'],
     }),
+
+    // utils - yup
+    builder.buildUMD('./src/utils/zod.ts', 'jotai-form-zod', 'dist/utils/zod', {
+      external: [/^jotai\//, 'jotai-form', 'zod'],
+    }),
+    builder.buildESM('./src/utils/yup.ts', 'dist/utils/yup', {
+      external: [/^jotai\//, 'jotai-form', 'yup'],
+    }),
   );
 };
 

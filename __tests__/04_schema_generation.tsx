@@ -9,8 +9,10 @@ import {
 } from '@testing-library/react';
 import React from 'react';
 import { z } from 'zod';
+import * as Yup from 'yup';
 import { atomFromZodSchema } from '../src/utils/zod';
 import { FormControlPrimitiveValues } from './components/FormControl';
+import { atomFromYupSchema } from '../src/utils/yup';
 
 afterEach(() => {
   cleanup();
@@ -25,6 +27,50 @@ describe('atomFromZodSchema', () => {
     });
 
     const formAtom = atomFromZodSchema(schema);
+
+    const { getByText, getByLabelText } = render(
+      <div>
+        <FormControlPrimitiveValues atomDef={formAtom} />
+      </div>,
+    );
+
+    await act(async () => {
+      await waitFor(() => {
+        const emailInput = getByLabelText('email-input');
+        getByText('email: jotai@example.com');
+
+        const ageInput = getByLabelText('age-input');
+        getByText('age: 0');
+
+        const agreedInput = getByLabelText('agree-input');
+        getByText('agreed: No');
+
+        fireEvent.change(emailInput, {
+          target: { value: 'reaper@example.com' },
+        });
+        getByText('email: reaper@example.com');
+
+        fireEvent.change(ageInput, {
+          target: { value: '2' },
+        });
+        getByText('age: 2');
+
+        fireEvent.click(agreedInput);
+        getByText('agreed: Yes');
+      });
+    });
+  });
+});
+
+describe('atomFromYupSchema', () => {
+  it('will create a form atom', async () => {
+    const schema = Yup.object().shape({
+      email: Yup.string().email().default('jotai@example.com'),
+      age: Yup.number(),
+      agreed: Yup.boolean(),
+    });
+
+    const formAtom = atomFromYupSchema(schema);
 
     const { getByText, getByLabelText } = render(
       <div>
