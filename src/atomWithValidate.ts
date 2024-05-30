@@ -1,6 +1,12 @@
 import { atom } from 'jotai/vanilla';
 import type { SetStateAction, WritableAtom } from 'jotai/vanilla';
 
+export const Constants = {
+  ACTION: Symbol.for('ACTION'),
+  ACTION_RESET: Symbol.for('RESET'),
+  VALUE: Symbol.for('VALUE'),
+};
+
 export type CommonState<Value> = {
   value: Value;
   isDirty: boolean;
@@ -102,10 +108,28 @@ export function atomWithValidate<Value>(
     (get) => get(baseAtom),
     (get, set, action: SetStateAction<Value>) => {
       const prevState = get(baseAtom);
-      const nextValue =
+      let toPerform: string | symbol | undefined;
+      let valueReader =
         typeof action === 'function'
           ? (action as any)(prevState.value)
           : action;
+
+      if (valueReader[Constants.ACTION]) {
+        toPerform = valueReader[Constants.ACTION];
+        valueReader = valueReader[Constants.VALUE];
+      }
+
+      const nextValue = valueReader;
+
+      if (toPerform === Constants.ACTION_RESET) {
+        set(baseAtom, {
+          value: nextValue,
+          isDirty: false,
+          isValid: true,
+        });
+        return;
+      }
+
       try {
         const validatedValue = validate(nextValue);
         if (validatedValue instanceof Promise) {
