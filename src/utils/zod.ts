@@ -51,7 +51,6 @@ export function atomFromZodSchema<
             toPrimitiveKey
           ] as INTERNAL_DEFAULT_MAP_KEY;
           const defaultValue = INSTANCE_DEFAULT_MAP[primitiveValue];
-          // eslint-disable-next-line no-underscore-dangle
           const validationAtom = atomWithValidate(defaultValue, {
             validate: (d) => value.parse(d),
           });
@@ -62,7 +61,10 @@ export function atomFromZodSchema<
   }
   return atomWithFormControls<AtomGroup, Keys, Vals>(result as AtomGroup, {
     validate: (values) => {
-      schema.parse(values);
+      const validationResult = schema.safeParse(values);
+      if (!validationResult.success) {
+        throw validationResult.error;
+      }
     },
     ...options,
   });
