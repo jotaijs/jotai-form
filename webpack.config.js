@@ -34,6 +34,8 @@ module.exports = {
   resolve: {
     extensions: ['.js', '.jsx', '.ts', '.tsx'],
     alias: {
+      'jotai-form/zod': `${__dirname}/src/utils/zod.ts`,
+      'jotai-form/yup': `${__dirname}/src/utils/yup.ts`,
       'jotai-form': `${__dirname}/src`,
     },
   },
