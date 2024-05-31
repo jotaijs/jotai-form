@@ -21,6 +21,7 @@ export type FormControls<Keys extends string, Vals> = {
   fieldErrors: {
     [k: string]: any;
   };
+  isDirty: boolean;
   touched: Record<Keys, boolean>;
   focused: Record<Keys, boolean>;
   setValue(key: Keys, value: Vals): void;
