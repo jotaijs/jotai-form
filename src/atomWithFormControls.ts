@@ -53,6 +53,13 @@ export function atomWithFormControls<
     Object.entries(labeledAtoms).map(([k]) => [k, false]),
   );
 
+  const isDirtyAtom = atom((get) => {
+    return Object.values(labeledAtoms)
+      .map((atomRef) => {
+        return get(atomRef).isDirty;
+      })
+      .some((d) => d);
+  });
   const touchedState = atom(initBooleanState);
   const focusedState = atom(initBooleanState);
   const validating = validateAtoms(labeledAtoms, validate);
@@ -109,12 +116,14 @@ export function atomWithFormControls<
       const errLen = Object.keys(errorVals).filter((x) => errorVals[x]).length;
       const validateAtomResult = get(formGroupAtomValues);
       const isValid = Boolean(validateAtomResult.isValid && errLen === 0);
+      const isDirty = get(isDirtyAtom);
 
       // INTERNAL USECASE, AVOID USING IN YOUR OWN LIBS
       const setter = atomOptions.setSelf;
 
       return {
         ...validateAtomResult,
+        isDirty,
         isValid,
         fieldErrors: <Record<Keys, any>>errorVals,
         touched: <Record<Keys, boolean>>get(touchedState),
