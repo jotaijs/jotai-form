@@ -5,6 +5,34 @@ type Props = {
   atomDef: Atom<any>;
 };
 
+export const FormControlPrimitiveValues = ({ atomDef }: Props) => {
+  const { values, handleOnChange } = useAtomValue(atomDef);
+
+  return (
+    <>
+      <input
+        aria-label="email-input"
+        value={values.email}
+        onChange={(e) => handleOnChange('email')(e.target.value)}
+      />
+      <p>email: {values.email}</p>
+      <input
+        aria-label="age-input"
+        value={values.age}
+        onChange={(e) => handleOnChange('age')(e.target.value)}
+      />
+      <p>age: {values.age}</p>
+      <input
+        aria-label="agree-input"
+        type="checkbox"
+        checked={values.agreed}
+        onChange={(e) => handleOnChange('agreed')(e.target.checked)}
+      />
+      <p>agreed: {values.agreed ? 'Yes' : 'No'}</p>
+    </>
+  );
+};
+
 export const FormControlValues = ({ atomDef }: Props) => {
   const { values, handleOnChange } = useAtomValue(atomDef);
 

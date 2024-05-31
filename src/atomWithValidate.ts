@@ -47,6 +47,7 @@ export function atomWithValidate<Value>(
   let initialPromise: Promise<Value> | undefined;
   try {
     const initialValidatedValue = validate(initialValue);
+
     if (initialValidatedValue instanceof Promise) {
       initialPromise = initialValidatedValue;
       initialState = {
@@ -69,6 +70,7 @@ export function atomWithValidate<Value>(
       error,
     };
   }
+
   const baseAtom = atom(initialState);
   if (process.env.NODE_ENV !== 'production') {
     baseAtom.debugPrivate = true;

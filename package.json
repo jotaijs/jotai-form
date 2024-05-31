@@ -27,6 +27,18 @@
       "module": "./dist/react/index.modern.js",
       "import": "./dist/react/index.modern.mjs",
       "default": "./dist/react/index.umd.js"
+    },
+    "./zod": {
+      "types": "./dist/utils/src/utils/zod.d.ts",
+      "module": "./dist/utils/zod.modern.js",
+      "import": "./dist/utils/zod.modern.mjs",
+      "default": "./dist/utils/zod.umd.js"
+    },
+    "./yup": {
+      "types": "./dist/utils/src/utils/yup.d.ts",
+      "module": "./dist/utils/yup.modern.js",
+      "import": "./dist/utils/yup.modern.mjs",
+      "default": "./dist/utils/yup.umd.js"
     }
   },
   "sideEffects": false,
@@ -54,7 +66,10 @@
     "preset": "ts-jest/presets/js-with-ts",
     "testPathIgnorePatterns": [
       "__tests__/components"
-    ]
+    ],
+    "moduleNameMapper": {
+      "jotai-form": "<rootDir>/src"
+    }
   },
   "keywords": [
     "jotai",
@@ -104,10 +119,20 @@
     "webpack": "^5.89.0",
     "webpack-cli": "^4.10.0",
     "webpack-dev-server": "^4.15.1",
-    "yup": "^0.32.11",
+    "yup": "^1.4.0",
     "zod": "^3.22.4"
   },
   "peerDependencies": {
-    "jotai": ">=2"
+    "jotai": ">=2",
+    "yup": ">=1",
+    "zod": ">=3"
+  },
+  "peerDependenciesMeta": {
+    "zod": {
+      "optional": true
+    },
+    "yup": {
+      "optional": true
+    }
   }
 }

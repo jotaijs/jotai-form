@@ -15,7 +15,9 @@
     "sourceMap": true,
     "baseUrl": ".",
     "paths": {
-      "jotai-form": ["./src"]
+      "jotai-form": ["./src"],
+      "jotai-form/zod": ["./src/utils/zod.ts"],
+      "jotai-form/yup": ["./src/utils/yup.ts"]
     },
     "outDir": "./dist"
   }
